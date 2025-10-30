@@ -4,6 +4,7 @@
     <select id="pagec" resultType="com.th.marketgod.entity.Comment">
         SELECT c.*,
                u.name   AS username,
+               u.image  AS userimage,
                g.goodsname AS goodsname
         FROM comment c
                  JOIN `user` u   ON u.id = c.userid

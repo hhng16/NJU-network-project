@@ -40,4 +40,7 @@ public class Comment implements Serializable {
     @TableField(exist = false)
     private String goodsname;
 
+    @TableField(exist = false)
+    private String userimage;
+
 }
