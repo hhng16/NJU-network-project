@@ -17,7 +17,11 @@ const routes = [
     name: 'update',
     component: () => import('../components/update')
   },
-
+  {
+    path: '/goods/detail',
+    name: 'GoodsDetail',
+    component: () => import('@/views/GoodsDetail.vue')
+  },
   {
     path: "/Index",
     name: "index",

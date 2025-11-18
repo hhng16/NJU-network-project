@@ -64,6 +64,7 @@ public class GoodsController {
     @PostMapping("/listPage")
     public Result listPage(@RequestBody QuerryPageParam query){
         HashMap param = query.getParam();
+        Integer id= (Integer)param.get("id");
         String name = (String)param.get("goodsname");
         Integer tagob=( Integer)param.get("tag");
         int tag = tagob != null ? tagob : 0;
@@ -82,6 +83,9 @@ public class GoodsController {
 //        if(StringUtils.isNotBlank(author) && !"null".equals(author)){
 //            lambdaQueryWrapper.like(Goods::getAuthor,author);
 //        }
+        if(id != null){
+            lambdaQueryWrapper.eq(Goods::getId, id);
+        }
         if(tag != 0){
             lambdaQueryWrapper.eq(Goods::getTag,tag);
         }
@@ -107,7 +111,7 @@ public class GoodsController {
             Map<Integer, String> idToName = users.stream()
                     .collect(Collectors.toMap(User::getId, User::getName));
             Map<Integer, String> idToNumber = users.stream()
-                    .collect(Collectors.toMap(User::getId, User::getNumber));
+                    .collect(Collectors.toMap(User::getId, u -> u.getNumber() == null ? "" : u.getNumber()));
 
             for (Goods g : records) {
                 if (g.getAuthorid() != null) {

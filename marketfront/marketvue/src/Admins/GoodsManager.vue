@@ -46,6 +46,11 @@
           </el-popconfirm>
         </template>
       </el-table-column>
+      <el-table-column label="操作" width="120" align="center">
+        <template slot-scope="scope">
+          <el-button size="small" type="primary" @click="viewDetail(scope.row)">查看详情</el-button>
+        </template>
+      </el-table-column>
 
     </el-table>
     <el-pagination
@@ -211,6 +216,14 @@ export default {
     },
     fixurl(fileName){
         return `http://localhost:8095/images/${fileName}`;
+    },
+    viewDetail(row) {
+      this.$router.push({
+
+        name: 'GoodsDetail',
+        query: { id: row.id }
+
+      });
     },
     // kick(row) {
     //   this.form.id = row.id

@@ -23,7 +23,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel(value="Goods对象", description="")
 public class Goods implements Serializable {
-    @TableField(exist = false)
+    @TableField(exist = false)//不是表的一部分
     private String authorName;
 
     @TableField(exist = false)

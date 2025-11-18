@@ -46,7 +46,7 @@ public class CommentController {
         currentCount = currentCount + 1;
 
         double avg = currentSum / currentCount;
-        System.out.println(avg);
+        //System.out.println(avg);
         BigDecimal bd = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
         double newAvg = bd.doubleValue();
 

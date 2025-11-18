@@ -74,6 +74,14 @@ export default {
       this.pageNum = val;
       this.loadPost();
     },
+    viewDetail(row) {
+      this.$router.push({
+
+        name: 'GoodsDetail',
+        query: { id: row.id }
+
+      });
+    },
   },
   mounted() {
     this.loadPost();
@@ -120,7 +128,11 @@ export default {
         </el-table-column>
         <el-table-column prop="authorNumber" label="联系方式" width="120" align="center"></el-table-column>
         <el-table-column prop="rateAvg" label="评分" width="120" align="center"></el-table-column>
-
+        <el-table-column label="操作" width="120" align="center">
+          <template slot-scope="scope">
+            <el-button size="small" type="primary" @click="viewDetail(scope.row)">查看详情</el-button>
+          </template>
+        </el-table-column>
         <!-- 空数据插槽 -->
         <template slot="empty">
           <div style="padding: 40px; text-align: center; color: #909399;">
