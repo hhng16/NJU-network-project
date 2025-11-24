@@ -1,6 +1,6 @@
 <template>
 
-  <div>
+  <div v-if="user && user.roleid < 2">
     <div style="margin-bottom: 5px;">
       <el-input v-model="name" placeholder="请输入你的商品名" suffix-icon="el-icon-search" style="width: 200px;"
                 @keyup.enter.native="loadPost"></el-input>
@@ -48,6 +48,13 @@
         :total="total">
     </el-pagination>
 
+  </div>
+  <div v-else>
+    <el-alert
+        title="您没有权限访问此页面"
+        type="error"
+        show-icon        style="margin-top: 20px;">
+    </el-alert>
   </div>
 </template>
 

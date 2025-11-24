@@ -35,29 +35,70 @@ public class CommentController {
     @Autowired
     GoodsService goodsService;
 
-    @PostMapping("/save")
-    public boolean save(@RequestBody Comment comment) {
-        commentService.save(comment);
-        Goods g = goodsService.getById(comment.getGoodsid());
-        double currentSum = g.getRateSum();
+//    @PostMapping("/save")
+//    public boolean save(@RequestBody Comment comment) {
+//        commentService.save(comment);
+//        Goods g = goodsService.getById(comment.getGoodsid());
+//        double currentSum = g.getRateSum();
+//
+//        currentSum += comment.getRate();
+//        Integer currentCount = g.getRateCount();
+//        currentCount = currentCount + 1;
+//
+//        double avg = currentSum / currentCount;
+//        //System.out.println(avg);
+//        BigDecimal bd = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
+//        double newAvg = bd.doubleValue();
+//
+//        g.setRateSum(currentSum);
+//        g.setRateCount(currentCount);
+//        g.setRateAvg(newAvg);
+//
+//        boolean updated = goodsService.updateById(g);
+//
+//        return true;
+//    }
+@PostMapping("/save")
+public Result save(@RequestBody Comment comment) {
+    try {
+        // 检查是否已存在该用户对商品的评论
+        Comment existing = commentService.getOne(new LambdaQueryWrapper<Comment>()
+                .eq(Comment::getUserid, comment.getUserid())
+                .eq(Comment::getGoodsid, comment.getGoodsid()));
 
-        currentSum += comment.getRate();
-        Integer currentCount = g.getRateCount();
-        currentCount = currentCount + 1;
 
-        double avg = currentSum / currentCount;
-        //System.out.println(avg);
-        BigDecimal bd = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
-        double newAvg = bd.doubleValue();
+        if (existing != null) {
 
-        g.setRateSum(currentSum);
-        g.setRateCount(currentCount);
-        g.setRateAvg(newAvg);
+            System.out.println("已存在该用户对商品的评论");
+            return Result.fail();
+        }
 
-        boolean updated = goodsService.updateById(g);
+        // 保存评论
+        boolean saved = commentService.save(comment);
 
-        return true;
+        if (saved) {
+            // 更新商品评分统计
+            System.out.println("成功半！");
+            Goods g = goodsService.getById(comment.getGoodsid());
+            double currentSum = g.getRateSum();
+            currentSum += comment.getRate();
+            Integer currentCount = g.getRateCount() + 1;
+            double avg = currentSum / currentCount;
+            BigDecimal bd = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
+            double newAvg = bd.doubleValue();
+            System.out.println("成功！");
+            // 继续执行后续逻辑...
+            return Result.suc();
+        } else {
+            System.out.println("死");
+            return Result.fail();
+        }
+    } catch (Exception e) {
+        System.out.println("驾崩");
+        return Result.fail();
     }
+}
+
     @PostMapping("/mod")
     public Result mod(@RequestBody Comment comment) {
         try {
@@ -104,9 +145,66 @@ public class CommentController {
         }
     }
     @PostMapping("/savemod")
-    public boolean savemod(@RequestBody Comment comment) {
-        return commentService.saveOrUpdate(comment);
+    public Result savemod(@RequestBody Comment comment) {
+        try {
+            // 检查评论是否存在
+            Comment existing = commentService.getOne(new LambdaQueryWrapper<Comment>()
+                    .eq(Comment::getUserid, comment.getUserid())
+                    .eq(Comment::getGoodsid, comment.getGoodsid()));
+
+            if (existing != null) {
+                // 更新现有评论 - 需要更新商品评分统计
+                Goods g = goodsService.getById(comment.getGoodsid());
+                if (g != null) {
+                    double currentSum = g.getRateSum();
+                    // 减去原来的评分，加上新的评分
+                    currentSum = currentSum - existing.getRate() + comment.getRate();
+
+                    // 计算新的平均分
+                    double avg = currentSum / g.getRateCount();
+                    BigDecimal bd = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
+                    double newAvg = bd.doubleValue();
+
+                    // 更新商品评分统计
+                    g.setRateSum(currentSum);
+                    g.setRateAvg(newAvg);
+                    goodsService.updateById(g);
+                }
+
+                // 更新评论
+                boolean updated = commentService.update(comment,
+                        new LambdaQueryWrapper<Comment>()
+                                .eq(Comment::getUserid, comment.getUserid())
+                                .eq(Comment::getGoodsid, comment.getGoodsid()));
+                return updated ? Result.suc("评论更新成功") : Result.fail();
+            } else {
+                // 创建新评论 - 与save方法逻辑相同
+                boolean saved = commentService.save(comment);
+                if (saved) {
+                    Goods g = goodsService.getById(comment.getGoodsid());
+                    if (g != null) {
+                        double currentSum = g.getRateSum() + comment.getRate();
+                        Integer currentCount = g.getRateCount() + 1;
+                        double avg = currentSum / currentCount;
+                        BigDecimal bd = BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP);
+                        double newAvg = bd.doubleValue();
+
+                        g.setRateSum(currentSum);
+                        g.setRateCount(currentCount);
+                        g.setRateAvg(newAvg);
+                        goodsService.updateById(g);
+                    }
+                    return Result.suc("评论保存成功");
+                } else {
+                    return Result.fail();
+                }
+            }
+        } catch (Exception e) {
+            return Result.fail();
+        }
     }
+
+
     @GetMapping("/delete")
     public Result delete(@RequestParam Integer userid, @RequestParam Integer goodsid) {
         Comment comment = commentService.getOne(

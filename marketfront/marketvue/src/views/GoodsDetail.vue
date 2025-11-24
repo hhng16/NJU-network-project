@@ -51,7 +51,7 @@
         <el-form>
           <el-form-item>
             <el-input
-                v-model="newComment.content"
+                v-model="newComment.message"
                 type="textarea"
                 :rows="3"
                 placeholder="请输入您的评论..."
@@ -59,11 +59,16 @@
                 show-word-limit>
             </el-input>
           </el-form-item>
+          <!-- 添加评分组件 -->
+          <el-form-item label="评分">
+            <el-rate v-model="newComment.rate" :max="5"></el-rate>
+          </el-form-item>
           <el-form-item style="text-align: right;">
-            <el-button type="primary" @click="submitComment">发表评论</el-button>
+            <el-button type="primary" @click="submitComment">发表或修改评论</el-button>
           </el-form-item>
         </el-form>
       </el-card>
+
 
       <!-- 评论列表 -->
       <div class="comments-list" v-if="comments.length > 0">
@@ -117,7 +122,8 @@ export default {
       totalComments: 0,       // 评论总数
       commentsPerPage: 10,    // 每页评论数
       newComment: {          // 新评论内容
-        message: ''
+        message: '',
+        rate: 1
       },
       avatarCache: {}
 
@@ -269,26 +275,27 @@ export default {
     },
 
     submitComment() {
-      if (!this.newComment.content.trim()) {
+      if (!this.newComment.message.trim()) {
         this.$message.warning('请输入评论内容');
         return;
       }
 
-      // 从本地存储获取当前用户信息
-      const currentUser = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      const userId = currentUser.id || 1; // 默认ID为1
-
+      // 从本地存储获取当前用户信息//rate
+      const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
+      const userId = currentUser.id || 114514; // 默认ID为1
       const goodsId = this.$route.query.id;
 
-      this.$axios.post(`${this.$httpUrl}/comment/save`, {
+      this.$axios.post(`${this.$httpUrl}/comment/savemod`, {
         userid: userId,
         goodsid: parseInt(goodsId),
-        content: this.newComment.content
+        message: this.newComment.message,
+        rate: this.newComment.rate
       }).then(res => res.data)
           .then(res => {
             if (res.code === 200) {
               this.$message.success('评论成功');
-              this.newComment.content = '';
+              this.newComment.message = '';
+              this.newComment.rate = 1;
               this.loadComments(); // 重新加载评论
             } else {
               this.$message.error('评论失败');
