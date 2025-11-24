@@ -93,7 +93,6 @@
   position: relative;
 }
 
-/* 添加半透明遮罩层，让文字更清晰 */
 .home-container::before {
   content: '';
   position: absolute;
@@ -155,7 +154,7 @@
   height: 500px;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 改为左右布局 */
+  justify-content: space-between;
   overflow: hidden;
   padding: 0 40px;
 }
@@ -174,23 +173,23 @@
   transform: scale(1.1);
 }
 
-/* 主图片容器 - 上下顶满，保持比例 */
+/* 主图片容器*/
 .image-main-container {
   position: relative;
   z-index: 2;
-  height: 100%; /* 上下顶满 */
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1; /* 占据剩余空间 */
-  max-width: 60%; /* 限制图片区域宽度 */
+  flex: 1;
+  max-width: 60%;
 }
 
 .carousel-image {
-  height: 100%; /* 上下顶满 */
-  width: auto; /* 宽度自适应，保持比例 */
-  max-width: 100%; /* 限制最大宽度 */
-  object-fit: contain; /* 保持图片完整比例 */
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
   object-position: center;
   transition: all 0.3s ease;
 }
@@ -344,14 +343,14 @@
 
   .carousel-item {
     height: 400px;
-    flex-direction: column; /* 移动端改为上下布局 */
+    flex-direction: column;
     justify-content: center;
     padding: 20px;
   }
 
   .image-main-container {
     max-width: 100%;
-    height: 60%; /* 移动端图片区域高度 */
+    height: 60%;
     margin-bottom: 20px;
   }
 

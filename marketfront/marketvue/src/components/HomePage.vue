@@ -181,15 +181,13 @@ export default {
   margin: 0;
 }
 
-/* 上部分：个人信息和今日信息 */
 .top-section {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* 左边占比更多 */
+  grid-template-columns: 2fr 1fr;
   gap: 24px;
   align-items: start;
 }
 
-/* 卡片样式 */
 .info-card,
 .today-card,
 .calendar-card {
