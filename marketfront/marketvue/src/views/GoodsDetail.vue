@@ -87,7 +87,7 @@
         </el-card>
 
         <!-- 分页 -->
-        <div class="pagination-container">
+        <div class="pagination-container" v-if="totalComments > commentsPerPage">
           <el-pagination
               background
               layout="prev, pager, next, jumper, ->, total"
@@ -236,13 +236,16 @@ export default {
         pageSize: this.commentsPerPage,
         pageNum: this.currentPage,
         param: {
-          goodsId: parseInt(goodsId)
+          goodsid: parseInt(goodsId)
         }
       }).then(res => res.data)
           .then(res => {
             if (res.code === 200) {
               this.comments = res.data;
               this.totalComments = res.totalCount;
+              this.comments = Array.isArray(res.data) ? res.data : [];
+              // 确保 totalCount 不小于实际数据长度
+              this.totalComments = Math.max(res.totalCount || 0, this.comments.length);
 
               this.comments.forEach(comment => {
                 if (comment.username) {
@@ -254,11 +257,14 @@ export default {
           .catch(error => {
             console.error('获取评论失败:', error);
             this.$message.error('获取评论失败');
+            this.comments = [];
+            this.totalComments = 0;
           });
     },
 
     handlePageChange(page) {
-      this.currentPage = page;
+      const maxPage = Math.ceil(this.totalComments / this.commentsPerPage) || 1;
+      this.currentPage = Math.min(page, maxPage);
       this.loadComments();
     },
 
@@ -268,9 +274,15 @@ export default {
         return;
       }
 
+      // 从本地存储获取当前用户信息
+      const currentUser = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const userId = currentUser.id || 1; // 默认ID为1
+
       const goodsId = this.$route.query.id;
-      this.$axios.post(`${this.$httpUrl}/comment/add`, {
-        goodsId: parseInt(goodsId),
+
+      this.$axios.post(`${this.$httpUrl}/comment/save`, {
+        userid: userId,
+        goodsid: parseInt(goodsId),
         content: this.newComment.content
       }).then(res => res.data)
           .then(res => {

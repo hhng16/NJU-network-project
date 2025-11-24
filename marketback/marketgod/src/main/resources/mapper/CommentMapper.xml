@@ -9,8 +9,9 @@
         FROM comment c
                  JOIN `user` u   ON u.id = c.userid
                  JOIN goods g    ON g.id = c.goodsid
-        ORDER BY c.created_at DESC
             ${ew.customSqlSegment}
+        ORDER BY c.created_at DESC
+
     </select>
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.th.marketgod.entity.Comment">

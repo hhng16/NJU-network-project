@@ -148,11 +148,17 @@ public class CommentController {
     public Result listPageC1(@RequestBody QuerryPageParam query) {
         HashMap param = query.getParam();
         String name = (String) param.get("name");
-        Page<Comment> page = new Page(1,2);
-        page.setCurrent(query.getPageNum());
-        page.setSize(query.getPageSize());
-        QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
-        IPage result = commentService.pagec(page, queryWrapper);
+        Integer goodsid = (Integer) param.get("goodsid");
+        LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//        if(goodsid== null){
+//            System.out.println(goodsid+"那一天的忧郁忧郁起来");
+//            System.out.println(goodsid+"那一天的忧郁忧郁起来");
+//        }
+        if (goodsid != null && goodsid > 0) {
+            lambdaQueryWrapper.eq(Comment::getGoodsid, goodsid);
+        }
+        Page<Comment> page = new Page<>(query.getPageNum(), query.getPageSize());
+        IPage result = commentService.pagec(page, lambdaQueryWrapper);
         return Result.suc(result.getRecords(),result.getTotal());
     }
 
