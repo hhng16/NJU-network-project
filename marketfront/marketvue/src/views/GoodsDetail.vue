@@ -29,7 +29,9 @@
             </el-descriptions-item>
             <el-descriptions-item label="发布人">{{ goodsInfo.authorName }}</el-descriptions-item>
             <el-descriptions-item label="联系方式">{{ goodsInfo.authorNumber }}</el-descriptions-item>
-            <el-descriptions-item label="平均评分">{{ goodsInfo.rateAvg || '暂无评分' }}</el-descriptions-item>
+            <el-descriptions-item label="平均评分">
+              <el-rate v-model="goodsInfo.rateAvg" disabled text-color="#ff9900" show-score></el-rate>
+            </el-descriptions-item>
           </el-descriptions>
 
           <div style="margin-top: 20px;">
@@ -39,6 +41,68 @@
         </el-col>
       </el-row>
     </el-card>
+    <!-- 评论区 -->
+    <el-divider></el-divider>
+    <div class="comments-section">
+      <h3>评论区</h3>
+
+      <!-- 发表评论 -->
+      <el-card class="comment-input-card" shadow="never">
+        <el-form>
+          <el-form-item>
+            <el-input
+                v-model="newComment.content"
+                type="textarea"
+                :rows="3"
+                placeholder="请输入您的评论..."
+                maxlength="500"
+                show-word-limit>
+            </el-input>
+          </el-form-item>
+          <el-form-item style="text-align: right;">
+            <el-button type="primary" @click="submitComment">发表评论</el-button>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 评论列表 -->
+      <div class="comments-list" v-if="comments.length > 0">
+        <el-card
+            v-for="comment in comments"
+            :key="comment.id"
+            class="comment-card"
+            shadow="never">
+          <div class="comment-header">
+            <div class="user-info">
+              <el-avatar :src="getUserAvatar(comment.username)" size="medium" icon="el-icon-user-solid" class="user-avatar"></el-avatar>
+              <div class="user-details">
+                <div class="username">{{ comment.username || '匿名用户' }}</div>
+                <div class="comment-time">{{ formatDate(comment.createdAt) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="comment-content">
+            {{ comment.message }}
+          </div>
+        </el-card>
+
+        <!-- 分页 -->
+        <div class="pagination-container">
+          <el-pagination
+              background
+              layout="prev, pager, next, jumper, ->, total"
+              :total="totalComments"
+              :page-size="commentsPerPage"
+              :current-page="currentPage"
+              @current-change="handlePageChange"
+              :pager-count="5">
+          </el-pagination>
+        </div>
+      </div>
+
+      <!-- 无评论提示 -->
+      <el-empty v-else description="暂无评论，快来抢沙发吧！" class="no-comments"></el-empty>
+    </div>
   </div>
 </template>
 
@@ -47,12 +111,22 @@ export default {
   name: 'GoodsDetail',
   data() {
     return {
-      goodsInfo: {}
+      goodsInfo: {},
+      comments: [],           // 评论列表
+      currentPage: 1,         // 当前页码
+      totalComments: 0,       // 评论总数
+      commentsPerPage: 10,    // 每页评论数
+      newComment: {          // 新评论内容
+        message: ''
+      },
+      avatarCache: {}
+
     }
   },
 
   mounted() {
     this.loadGoodsDetail();
+    this.loadComments();
   },
   watch: {
     '$route'(to, from) {
@@ -91,7 +165,29 @@ export default {
             this.$message.error('请求出错');
           });
     },
+    getUserAvatar(username) {
+      if (!username) return '';
+      return this.avatarCache[username] || '';
+    },
+    async loadUserAvatar(username) {
+      if (!username || this.avatarCache[username]) return;
 
+      try {
+        const response = await this.$axios.get(`${this.$httpUrl}/user/findByName?name=${encodeURIComponent(username)}`);
+        const res = response.data;
+
+        let avatarUrl = '';
+        if (res.code === 200 && res.data && res.data.length > 0) {
+          const user = res.data[0];
+          avatarUrl = user.image ? `http://localhost:8095/heads/${user.image}` : '';
+        }
+
+        this.$set(this.avatarCache, username, avatarUrl);
+      } catch (error) {
+        console.error('获取用户头像失败:', error);
+        this.$set(this.avatarCache, username, '');
+      }
+    },
     fixurl(fileName) {
       return fileName ? `http://localhost:8095/images/${fileName}` : '';
     },
@@ -113,7 +209,87 @@ export default {
 
     addToCart() {
       this.$message.info('加入购物车功能待实现');
+    },
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) {
+        return '今天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      } else if (diffDays === 1) {
+        return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      } else if (diffDays < 7) {
+        return `${diffDays}天前`;
+      } else {
+        return date.toLocaleDateString('zh-CN');
+      }
+    },
+
+    /////
+
+    loadComments() {
+      const goodsId = this.$route.query.id;
+      this.$axios.post(`${this.$httpUrl}/comment/listPageC1`, {
+        pageSize: this.commentsPerPage,
+        pageNum: this.currentPage,
+        param: {
+          goodsId: parseInt(goodsId)
+        }
+      }).then(res => res.data)
+          .then(res => {
+            if (res.code === 200) {
+              this.comments = res.data;
+              this.totalComments = res.totalCount;
+
+              this.comments.forEach(comment => {
+                if (comment.username) {
+                  this.loadUserAvatar(comment.username);
+                }
+              });
+            }
+          })
+          .catch(error => {
+            console.error('获取评论失败:', error);
+            this.$message.error('获取评论失败');
+          });
+    },
+
+    handlePageChange(page) {
+      this.currentPage = page;
+      this.loadComments();
+    },
+
+    submitComment() {
+      if (!this.newComment.content.trim()) {
+        this.$message.warning('请输入评论内容');
+        return;
+      }
+
+      const goodsId = this.$route.query.id;
+      this.$axios.post(`${this.$httpUrl}/comment/add`, {
+        goodsId: parseInt(goodsId),
+        content: this.newComment.content
+      }).then(res => res.data)
+          .then(res => {
+            if (res.code === 200) {
+              this.$message.success('评论成功');
+              this.newComment.content = '';
+              this.loadComments(); // 重新加载评论
+            } else {
+              this.$message.error('评论失败');
+            }
+          })
+          .catch(error => {
+            console.error('评论出错:', error);
+            this.$message.error('评论出错');
+          });
     }
+
+
+    /////
   }
 }
 </script>
@@ -132,4 +308,72 @@ export default {
   background: #f5f7fa;
   color: #909399;
 }
+
+.comments-section {
+  margin-top: 30px;
+}
+
+.comment-input-card {
+  margin-bottom: 20px;
+  border: 1px solid #ebeef5;
+}
+
+.comment-card {
+  margin-bottom: 15px;
+  border: 1px solid #ebeef5;
+  transition: box-shadow 0.3s ease;
+}
+
+.comment-card:hover {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+  padding-bottom: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  margin-right: 12px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 2px;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #909399;
+}
+
+.comment-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #606266;
+  padding-left: 44px;
+  white-space: pre-wrap;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.no-comments {
+  padding: 40px 0;
+}
+
 </style>
