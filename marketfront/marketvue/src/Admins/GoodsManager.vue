@@ -1,6 +1,6 @@
 <template>
 
-  <div v-if="user && user.roleid < 2">
+  <div >
     <div style="margin-bottom: 5px;">
       <el-input v-model="goodsname" placeholder="请输入你的商品名" suffix-icon="el-icon-search" style="width: 200px;"
                 @keyup.enter.native="loadPost"></el-input>
@@ -10,12 +10,7 @@
       <el-button type="primary" style="margin-left: 5px;" @click="add">新增</el-button>
 
     </div>
-    <el-alert
-        v-if="user && user.roleid < 2"
-        title="您是管理员，可以管理所有商品"
-        type="info"
-        show-icon        style="margin-bottom: 10px;">
-    </el-alert>
+
     <el-table :data="tableData"
               :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
               border
@@ -44,11 +39,6 @@
           >
             <el-button slot="reference" size="small" type="danger" style="margin-left: 5px;" >删除</el-button>
           </el-popconfirm>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="120" align="center">
-        <template slot-scope="scope">
-          <el-button size="small" type="primary" @click="viewDetail(scope.row)">查看详情</el-button>
         </template>
       </el-table-column>
 
@@ -117,13 +107,7 @@
   </span>
     </el-dialog>
   </div>
-  <div v-else>
-    <el-alert
-        title="您没有权限访问此页面"
-        type="error"
-        show-icon        style="margin-top: 20px;">
-    </el-alert>
-  </div>
+
 </template>
 
 <script>

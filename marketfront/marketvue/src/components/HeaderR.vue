@@ -99,7 +99,7 @@ export default {
         <el-menu-item @click.native="toUpdate" index="3-2">修改资料</el-menu-item>
         <el-menu-item @click.native="logout" index="3-3">退出登录</el-menu-item>
       </el-submenu>
-      <el-menu-item @click.native="toGoodManager" index="4" v-if="user.roleid < 2">商品管理</el-menu-item>
+      <el-menu-item @click.native="toGoodManager" index="4" >商品管理</el-menu-item>
       <el-menu-item @click.native="toUserManager" index="5" v-if="user.roleid < 2">用户管理</el-menu-item>
       <div style="position: absolute; top: 0; right: 50px; height: 100%; display: flex; align-items: center;">
         <span style="color: white; margin-right: 15px;">欢迎, {{ user.name }}</span>
