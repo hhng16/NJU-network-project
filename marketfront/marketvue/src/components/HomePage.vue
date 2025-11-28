@@ -42,13 +42,6 @@
             <div class="info-value">{{ user.name }}</div>
           </div>
 
-          <div class="info-item">
-            <div class="info-label">
-              <i class="el-icon-wallet"></i>
-              账户余额
-            </div>
-            <div class="info-value balance">¥{{ user.account || '0.00' }}</div>
-          </div>
 
           <div class="info-item">
             <div class="info-label">

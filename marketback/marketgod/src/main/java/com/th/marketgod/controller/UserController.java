@@ -13,6 +13,7 @@ import com.th.marketgod.service.UserService;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -102,6 +103,19 @@ public class UserController {
     public Result register(@RequestBody User user) {
         return userService.save(user)? Result.suc() : Result.fail();
     }
-
+    @PostMapping("/updateAvatar")
+    public Map<String, Object> updateAvatar(@RequestBody User user) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            // 根据id更新用户头像
+            userService.updateById(user);
+            result.put("code", 200);
+            result.put("msg", "头像更新成功");
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "头像更新失败: " + e.getMessage());
+        }
+        return result;
+    }
 
 }

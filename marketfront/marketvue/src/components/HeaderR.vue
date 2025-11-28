@@ -17,9 +17,9 @@ export default {
     logout() {
 
       this.$confirm('您确定要退出登录吗?', '提示', {
-        confirmButtonText: '确定', //确认按钮的文字显示
+        confirmButtonText: '确定',
         type: 'warning',
-        center: true, //文字居中显示
+        center: true,
       })
           .then(() => {
             this.$message({

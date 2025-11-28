@@ -26,4 +26,5 @@ public class UploadController {
     public String uploadHead(MultipartFile file) throws IOException {
         return uploadService.uploadHead(file);
     }
+
 }

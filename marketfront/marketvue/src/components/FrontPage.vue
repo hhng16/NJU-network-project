@@ -104,7 +104,6 @@
   z-index: 0;
 }
 
-/* 内容区域 */
 .carousel-section,
 .products-section {
   position: relative;
@@ -159,7 +158,6 @@
   padding: 0 40px;
 }
 
-/* 背景虚化效果 */
 .image-blur-background {
   position: absolute;
   top: 0;
@@ -388,10 +386,9 @@ export default {
   methods: {
     handleCarouselClick(item) {
       console.log('点击了轮播图:', item.title);
-      if (item.id === 2 || item.id === 3) {
-        this.$router.push('/PetShop');
-      } else if (item.id === 4) {
-        this.$router.push('/BookShop');
+      // 根据轮播图项跳转到不同页面
+      if (item.link) {
+        this.$router.push(item.link);
       }
     }
   },
@@ -402,41 +399,38 @@ export default {
           id: 1,
           image: require('../assets/龙千1.jpg'),
           title: '欢迎来到天工市场',
-          description: '汇聚精品好物，打造品质生活'
+          description: '汇聚精品好物，打造品质生活',
+          link: '/DailyShop'
         },
         {
           id: 2,
-          image: require('../assets/耄耋1.png'),
-          title: '夏季新品',
-          description: '最新商品火热上线，限时优惠'
+          image: require('../assets/game.jpg'),
+          title: '热门游戏推荐',
+          description: '最新游戏大作上线，限时特惠中',
+          link: '/VideoShop'
         },
         {
           id: 3,
           image: require('../assets/周刊1.jpg'),
-          title: '萌宠专区',
-          description: '可爱宠物等你来领养'
-        },
-        {
-          id: 4,
-          image: require('../assets/logo.png'),
           title: '阅读时光',
-          description: '精选书刊，丰富你的精神世界'
+          description: '精选书刊，丰富你的精神世界',
+          link: '/BookShop'
         }
       ],
       products: [
         {
           id: 1,
-          image: require('../assets/龙千1.jpg'),
+          image: require('../assets/music.jpg'),
           title: '夏季上新',
-          description: '幻想乡的新宠商品与特价，带来夏日清凉体验',
-          link: '/PetShop',
+          description: '精选音乐专辑与乐器，奏响夏日旋律',
+          link: '/MusicShop',
           buttonText: '立即探索'
         },
         {
           id: 2,
-          image: require('../assets/耄耋1.png'),
+          image: require('../assets/pet.jpg'),
           title: '萌宠特惠',
-          description: '买耄耋赠优惠卡，限量发售，机会难得',
+          description: '精选萌宠限时特价，陪伴你的每一天',
           link: '/PetShop',
           buttonText: '了解详情'
         },
