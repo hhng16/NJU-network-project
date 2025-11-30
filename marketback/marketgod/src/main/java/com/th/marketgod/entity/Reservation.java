@@ -28,7 +28,7 @@ public class Reservation implements Serializable {
 
     @TableField("user_id")
     @ApiModelProperty(value = "预订用户ID")
-    private Long userId;
+    private Integer userId;
 
     @TableField("goods_id")
     @ApiModelProperty(value = "预订商品ID")

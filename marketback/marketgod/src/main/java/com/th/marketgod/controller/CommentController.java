@@ -65,7 +65,7 @@ public class CommentController {
 public Result save(@RequestBody Comment comment) {
     try {
         //检查是否预订
-        Long userId = comment.getUserid();
+        Integer userId = comment.getUserid();
         Integer goodsId = comment.getGoodsid();
         boolean hasPermission = reservationService.checkCommentPermission(userId, goodsId);
         if (!hasPermission) {

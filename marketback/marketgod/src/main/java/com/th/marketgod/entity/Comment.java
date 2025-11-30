@@ -25,7 +25,7 @@ public class Comment implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long userid;
+    private Integer userid;
 
     private Integer goodsid;
 

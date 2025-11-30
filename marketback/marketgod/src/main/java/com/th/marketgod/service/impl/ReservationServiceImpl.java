@@ -41,7 +41,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result reserveGoods(Long userId, Integer goodsId, Integer reserveNum) {
+    public Result reserveGoods(Integer userId, Integer goodsId, Integer reserveNum) {
 
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -78,7 +78,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result cancelReservation(Long userId, Integer goodsId) {
+    public Result cancelReservation(Integer userId, Integer goodsId) {
         Reservation existing = reservationMapper.selectByUserIdAndGoodsId(userId, goodsId);
         if (existing == null) {
             return Result.fail();
@@ -97,7 +97,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         return Result.suc("退订成功");
     }
     @Override
-    public boolean checkCommentPermission(Long userId, Integer goodsId) {
+    public boolean checkCommentPermission(Integer userId, Integer goodsId) {
         Reservation reservation = reservationMapper.selectByUserIdAndGoodsId(userId, goodsId);
         return reservation != null;
     }

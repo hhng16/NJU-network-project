@@ -88,11 +88,11 @@
 
       <!-- 评论列表 -->
       <div class="comments-list" v-if="comments.length > 0">
-        <el-card>
+        <el-card
             v-for="comment in comments"
-            :key="comment.userid + '-' + comment.goodsid"  <!-- 联合主键作为key，避免重复 -->
-        class="comment-card"
-        shadow="never">
+            :key="comment.userid + '-' + comment.goodsid"
+            class="comment-card"
+            shadow="never">
         <div class="comment-header">
           <div class="user-info">
             <el-avatar :src="getUserAvatar(comment.username)" size="medium" icon="el-icon-user-solid" class="user-avatar"></el-avatar>
@@ -236,6 +236,7 @@ export default {
 
     openReserveDialog() {
       const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
+
       if (!currentUser.id) {
         this.$message.warning('请先登录');
         return;
@@ -245,6 +246,7 @@ export default {
         return;
       }
       this.reserveDialogVisible = true;
+      console.log('当前用户:', currentUser)
     },
 
     confirmReserve() {
@@ -252,11 +254,14 @@ export default {
       const userId = currentUser.id;
       const goodsId = this.$route.query.id;
 
-      this.$axios.post(`${this.$httpUrl}/reservation/reserve`, {
-        userId: userId,
-        goodsId: parseInt(goodsId),
-        reserveNum: this.reserveNum
-      }).then(res => res.data)
+      // 改为表单格式传递参数
+      const formData = new URLSearchParams();
+      formData.append('userId', userId);
+      formData.append('goodsId', parseInt(goodsId));
+      formData.append('reserveNum', this.reserveNum);
+
+      this.$axios.post(`${this.$httpUrl}/reservation/reserve`, formData)
+          .then(res => res.data)
           .then(res => {
             if (res.code === 200) {
               this.$alert(`${res.msg}\n${res.data}`, '预订成功', {
@@ -274,6 +279,7 @@ export default {
             this.$message.error('网络错误，请重试');
           });
     },
+
 
     handleCancel() {
       const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');

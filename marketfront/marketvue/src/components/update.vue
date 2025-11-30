@@ -7,7 +7,7 @@
             <!-- 使用 el-upload 组件，完全按照商品管理的模式 -->
             <el-upload
                 class="avatar-uploader"
-                action="http://localhost:8095/upload/uploadit"
+                action="http://localhost:8095/upload/uploadhead"
                 :show-file-list="false"
                 :on-success="handleAvatarSuccess"
                 :before-upload="beforeAvatarUpload"

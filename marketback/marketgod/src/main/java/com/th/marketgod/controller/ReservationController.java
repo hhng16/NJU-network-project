@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/reservation")
+@RequestMapping("/reservation")
 @Api(tags = "商品预订与退订接口")
 public class ReservationController {
     @Resource
@@ -19,7 +19,7 @@ public class ReservationController {
     @PostMapping("/reserve")
     @ApiOperation("商品预订")
     public Result reserve(
-            @RequestParam Long userId,
+            @RequestParam Integer userId,
             @RequestParam Integer goodsId,
             @RequestParam Integer reserveNum
     ) {
@@ -28,7 +28,7 @@ public class ReservationController {
     @PostMapping("/cancel")
     @ApiOperation("商品退订")
     public Result cancel(
-            @RequestParam Long userId,
+            @RequestParam Integer userId,
             @RequestParam Integer goodsId
     ) {
         return reservationService.cancelReservation(userId, goodsId);
@@ -36,7 +36,7 @@ public class ReservationController {
     @GetMapping("/check-comment-perm")
     @ApiOperation("校验用户评论权限")
     public Result checkCommentPermission(
-            @RequestParam Long userId,
+            @RequestParam Integer userId,
             @RequestParam Integer goodsId
     ) {
         boolean hasPermission = reservationService.checkCommentPermission(userId, goodsId);
@@ -45,8 +45,8 @@ public class ReservationController {
     @GetMapping("/page")
     @ApiOperation("分页查询预订记录")
     public Result pageReserve(
-            @RequestParam long current,
-            @RequestParam long size,
+            @RequestParam Integer current,
+            @RequestParam Integer size,
             Wrapper<Reservation> wrapper
     ) {
         IPage<Reservation> page = new Page<>(current, size);
