@@ -10,6 +10,7 @@ import com.th.marketgod.entity.Comment;
 import com.th.marketgod.entity.Goods;
 import com.th.marketgod.service.CommentService;
 import com.th.marketgod.service.GoodsService;
+import com.th.marketgod.service.ReservationService;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,8 @@ public class CommentController {
     CommentService commentService;
     @Autowired
     GoodsService goodsService;
+    @Autowired
+    ReservationService reservationService;
 
 //    @PostMapping("/save")
 //    public boolean save(@RequestBody Comment comment) {
@@ -61,6 +64,13 @@ public class CommentController {
 @PostMapping("/save")
 public Result save(@RequestBody Comment comment) {
     try {
+        //检查是否预订
+        Long userId = comment.getUserid();
+        Integer goodsId = comment.getGoodsid();
+        boolean hasPermission = reservationService.checkCommentPermission(userId, goodsId);
+        if (!hasPermission) {
+            return Result.fail();
+        }
         // 检查是否已存在该用户对商品的评论
         Comment existing = commentService.getOne(new LambdaQueryWrapper<Comment>()
                 .eq(Comment::getUserid, comment.getUserid())

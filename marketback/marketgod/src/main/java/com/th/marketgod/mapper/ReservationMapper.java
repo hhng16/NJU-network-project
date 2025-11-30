@@ -1,0 +1,24 @@
+package com.th.marketgod.mapper;
+
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.th.marketgod.entity.Reservation;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+/**
+ * <p>
+ *
+ * </p>
+ *
+ * @author demo
+ * @since 2025-10-30
+ */
+@Mapper
+public interface ReservationMapper extends BaseMapper<Reservation> {
+    IPage<Reservation> pageReserve(IPage<Reservation> page, @Param(Constants.WRAPPER) Wrapper<Reservation> wrapper);
+    Reservation selectByUserIdAndGoodsId(@Param("userId") Long userId, @Param("goodsId") Integer goodsId);
+}
