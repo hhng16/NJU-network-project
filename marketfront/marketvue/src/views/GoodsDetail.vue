@@ -35,12 +35,29 @@
           </el-descriptions>
 
           <div style="margin-top: 20px;">
-            <el-button type="primary" @click="buyGoods">立即购买</el-button>
-            <el-button @click="addToCart">加入购物车</el-button>
+            <!-- 核心修改1：替换按钮文案和绑定方法 -->
+            <el-button type="primary" @click="openReserveDialog">预订</el-button>
+            <el-button @click="handleCancel">退订</el-button>
           </div>
         </el-col>
       </el-row>
     </el-card>
+
+    <!-- 核心修改2：添加预订弹窗（Element UI 组件，文档要求） -->
+    <el-dialog title="预订商品" :visible.sync="reserveDialogVisible" width="30%">
+      <el-input-number
+          v-model="reserveNum"
+          :min="1"
+          :max="goodsInfo.storage"
+          label="预订数量"
+          style="width: 100%;"
+      ></el-input-number>
+      <div slot="footer">
+        <el-button @click="reserveDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmReserve">确认预订</el-button>
+      </div>
+    </el-dialog>
+
     <!-- 评论区 -->
     <el-divider></el-divider>
     <div class="comments-section">
@@ -54,7 +71,7 @@
                 v-model="newComment.message"
                 type="textarea"
                 :rows="3"
-                placeholder="请输入您的评论..."
+                placeholder="请先预订商品再评论..."
                 maxlength="500"
                 show-word-limit>
             </el-input>
@@ -69,26 +86,26 @@
         </el-form>
       </el-card>
 
-
       <!-- 评论列表 -->
       <div class="comments-list" v-if="comments.length > 0">
-        <el-card
+        <el-card>
             v-for="comment in comments"
-            :key="comment.id"
-            class="comment-card"
-            shadow="never">
-          <div class="comment-header">
-            <div class="user-info">
-              <el-avatar :src="getUserAvatar(comment.username)" size="medium" icon="el-icon-user-solid" class="user-avatar"></el-avatar>
-              <div class="user-details">
-                <div class="username">{{ comment.username || '匿名用户' }}</div>
-                <div class="comment-time">{{ formatDate(comment.createdAt) }}</div>
-              </div>
+            :key="comment.userid + '-' + comment.goodsid"  <!-- 联合主键作为key，避免重复 -->
+        class="comment-card"
+        shadow="never">
+        <div class="comment-header">
+          <div class="user-info">
+            <el-avatar :src="getUserAvatar(comment.username)" size="medium" icon="el-icon-user-solid" class="user-avatar"></el-avatar>
+            <div class="user-details">
+              <div class="username">{{ comment.username || '匿名用户' }}</div>
+              <div class="comment-time">{{ formatDate(comment.createdAt) }}</div>
             </div>
           </div>
-          <div class="comment-content">
-            {{ comment.message }}
-          </div>
+          <el-rate v-model="comment.rate" disabled text-color="#ff9900" :max="5" style="margin-left: auto;"></el-rate>
+        </div>
+        <div class="comment-content">
+          {{ comment.message }}
+        </div>
         </el-card>
 
         <!-- 分页 -->
@@ -125,19 +142,24 @@ export default {
         message: '',
         rate: 1
       },
-      avatarCache: {}
-
+      avatarCache: {},
+      // 核心新增：预订相关数据
+      reserveDialogVisible: false, // 预订弹窗显示控制
+      reserveNum: 1,               // 默认预订数量1
+      hasCommentPerm: false        // 评论权限标识
     }
   },
 
   mounted() {
     this.loadGoodsDetail();
     this.loadComments();
+    this.checkCommentPermission(); // 页面加载时校验评论权限
   },
   watch: {
     '$route'(to, from) {
       if (to.query.id !== from.query.id) {
         this.loadGoodsDetail();
+        this.checkCommentPermission(); // 路由切换时重新校验权限
       }
     }
   },
@@ -171,10 +193,12 @@ export default {
             this.$message.error('请求出错');
           });
     },
+
     getUserAvatar(username) {
       if (!username) return '';
       return this.avatarCache[username] || '';
     },
+
     async loadUserAvatar(username) {
       if (!username || this.avatarCache[username]) return;
 
@@ -194,6 +218,7 @@ export default {
         this.$set(this.avatarCache, username, '');
       }
     },
+
     fixurl(fileName) {
       return fileName ? `http://localhost:8095/images/${fileName}` : '';
     },
@@ -209,13 +234,103 @@ export default {
       return tagMap[tag] || '未知';
     },
 
-    buyGoods() {
-      this.$message.info('购买功能待实现');
+    openReserveDialog() {
+      const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
+      if (!currentUser.id) {
+        this.$message.warning('请先登录');
+        return;
+      }
+      if (this.goodsInfo.storage <= 0) {
+        this.$message.error('该商品已无库存，无法预订');
+        return;
+      }
+      this.reserveDialogVisible = true;
     },
 
-    addToCart() {
-      this.$message.info('加入购物车功能待实现');
+    confirmReserve() {
+      const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
+      const userId = currentUser.id;
+      const goodsId = this.$route.query.id;
+
+      this.$axios.post(`${this.$httpUrl}/reservation/reserve`, {
+        userId: userId,
+        goodsId: parseInt(goodsId),
+        reserveNum: this.reserveNum
+      }).then(res => res.data)
+          .then(res => {
+            if (res.code === 200) {
+              this.$alert(`${res.msg}\n${res.data}`, '预订成功', {
+                confirmButtonText: '确定'
+              });
+              this.reserveDialogVisible = false;
+              this.loadGoodsDetail();
+              this.checkCommentPermission();
+            } else {
+              this.$alert(res.msg || '预订失败', '提示');
+            }
+          })
+          .catch(error => {
+            console.error('预订请求错误:', error);
+            this.$message.error('网络错误，请重试');
+          });
     },
+
+    handleCancel() {
+      const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
+      const userId = currentUser.id;
+      const goodsId = this.$route.query.id;
+
+      if (!userId) {
+        this.$message.warning('请先登录');
+        return;
+      }
+
+      this.$axios.post(`${this.$httpUrl}/reservation/cancel`, {
+        userId: userId,
+        goodsId: parseInt(goodsId)
+      }).then(res => res.data)
+          .then(res => {
+            if (res.code === 200) {
+              this.$alert('退订成功', '提示');
+              this.loadGoodsDetail();
+              this.checkCommentPermission();
+            } else {
+              this.$alert(res.msg || '退订失败', '提示');
+            }
+          })
+          .catch(error => {
+            console.error('退订请求错误:', error);
+            this.$message.error('网络错误，请重试');
+          });
+    },
+
+    checkCommentPermission() {
+      const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
+      const userId = currentUser.id;
+      const goodsId = this.$route.query.id;
+
+      if (!userId || !goodsId) {
+        this.hasCommentPerm = false;
+        return;
+      }
+
+      this.$axios.get(`${this.$httpUrl}/reservation/check-comment-perm`, {
+        params: {
+          userId: userId,
+          goodsId: parseInt(goodsId)
+        }
+      }).then(res => res.data)
+          .then(res => {
+            if (res.code === 200) {
+              this.hasCommentPerm = res.data;
+            }
+          })
+          .catch(error => {
+            console.error('权限校验错误:', error);
+            this.hasCommentPerm = false;
+          });
+    },
+
     formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
@@ -234,8 +349,6 @@ export default {
       }
     },
 
-    /////
-
     loadComments() {
       const goodsId = this.$route.query.id;
       this.$axios.post(`${this.$httpUrl}/comment/listPageC1`, {
@@ -247,11 +360,8 @@ export default {
       }).then(res => res.data)
           .then(res => {
             if (res.code === 200) {
-              this.comments = res.data;
-              this.totalComments = res.totalCount;
               this.comments = Array.isArray(res.data) ? res.data : [];
-              // 确保 totalCount 不小于实际数据长度
-              this.totalComments = Math.max(res.totalCount || 0, this.comments.length);
+              this.totalComments = res.totalCount || this.comments.length;
 
               this.comments.forEach(comment => {
                 if (comment.username) {
@@ -275,14 +385,18 @@ export default {
     },
 
     submitComment() {
+      if (!this.hasCommentPerm) {
+        this.$message.error('请先预订该商品再评论');
+        return;
+      }
+
       if (!this.newComment.message.trim()) {
         this.$message.warning('请输入评论内容');
         return;
       }
 
-      // 从本地存储获取当前用户信息//rate
       const currentUser = JSON.parse(sessionStorage.getItem('User') || '{}');
-      const userId = currentUser.id || 114514; // 默认ID为1
+      const userId = currentUser.id;
       const goodsId = this.$route.query.id;
 
       this.$axios.post(`${this.$httpUrl}/comment/savemod`, {
@@ -298,7 +412,7 @@ export default {
               this.newComment.rate = 1;
               this.loadComments(); // 重新加载评论
             } else {
-              this.$message.error('评论失败');
+              this.$message.error(res.msg || '评论失败');
             }
           })
           .catch(error => {
@@ -306,9 +420,6 @@ export default {
             this.$message.error('评论出错');
           });
     }
-
-
-    /////
   }
 }
 </script>
@@ -349,6 +460,10 @@ export default {
 
 .comment-header {
   padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f5f5f5;
+  margin-bottom: 10px;
 }
 
 .user-info {
@@ -394,5 +509,4 @@ export default {
 .no-comments {
   padding: 40px 0;
 }
-
 </style>
