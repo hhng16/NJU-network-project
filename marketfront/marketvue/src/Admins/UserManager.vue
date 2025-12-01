@@ -26,7 +26,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-popconfirm
-              v-if="scope.row.id<=1"
+              v-if="scope.row.roleid<=1"
               title="确定封杀该用户吗吗？"
               @confirm="del(scope.row.id)"
               style="margin-left: 5px;"

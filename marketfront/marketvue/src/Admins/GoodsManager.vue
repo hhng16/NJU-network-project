@@ -4,13 +4,18 @@
     <div style="margin-bottom: 5px;">
       <el-input v-model="goodsname" placeholder="请输入你的商品名" suffix-icon="el-icon-search" style="width: 200px;"
                 @keyup.enter.native="loadPost"></el-input>
-      <el-button type="primary" style="margin-left: 5px;" @click="loadPost">查询</el-button>
-      <el-button type="success" @click="resetParam">重置</el-button>
+      <el-button type="primary" style="margin-left: 11px;" @click="loadPost">查询</el-button>
+      <el-button type="success" style="margin-right: 6px;" @click="resetParam">重置</el-button>
 
       <el-button type="primary" style="margin-left: 5px;" @click="add">新增</el-button>
 
     </div>
-
+    <el-alert
+        v-if="user && user.roleid < 2"
+        title="您是管理员，可以管理所有商品"
+        type="info"
+        show-icon        style="margin-bottom: 10px;">
+    </el-alert>
     <el-table :data="tableData"
               :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
               border
@@ -75,7 +80,7 @@
             <el-input type="textarea" v-model="form.storage"></el-input>
           </el-col>
         </el-form-item>
-        <el-form-item label="tag" prop="tag">
+        <el-form-item label="类型" prop="tag">
           <el-select v-model="form.tag" placeholder="请选择类型" style="width: 200px;">
             <el-option
                 v-for="item in options"
@@ -163,6 +168,12 @@ export default {
         ],
         price: [
           {required: true, message: '请输入价格', trigger: 'blur'}
+        ],
+        storage: [
+          {required: true, message: '请输入商品数量', trigger: 'blur'}
+        ],
+        tag: [
+          {required: true, message: '请输入类型', trigger: 'blur'}
         ]
       },
       user:JSON.parse(sessionStorage.getItem('User')),
@@ -309,6 +320,7 @@ export default {
         this.form.authorid = row.authorid
         this.form.storage = row.storage
         this.form.price = row.price
+        this.form.image = row.image
         this.form.tag = row.tag || 1;
       })
     },

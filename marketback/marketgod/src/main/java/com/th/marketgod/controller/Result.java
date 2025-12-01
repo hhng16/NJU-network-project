@@ -27,6 +27,10 @@ public class Result {
         return result(400,"失败",0L,null);
     }
 
+    public static Result fail(Object data){
+        return result(400, "失败", 0L, data);
+    }
+
     public static Result suc(){
         return result(200,"成功",0L,null);
     }

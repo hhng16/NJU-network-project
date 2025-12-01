@@ -36,8 +36,8 @@ public class GoodsController {
 
 
     @PostMapping("/save")
-    public boolean save(@RequestBody Goods goods) {
-        return goodsService.save(goods);
+    public Result save(@RequestBody Goods goods) {
+        return goodsService.save(goods) ? Result.suc() : Result.fail();
     }
     @PostMapping("/mod")
     public Result mod(@RequestBody Goods goods) {

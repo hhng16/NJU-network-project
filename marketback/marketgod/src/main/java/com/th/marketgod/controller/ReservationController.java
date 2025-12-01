@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.th.marketgod.entity.Goods;
 import com.th.marketgod.entity.Reservation;
+import com.th.marketgod.service.GoodsService;
 import com.th.marketgod.service.ReservationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +20,9 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
     @Resource
     private ReservationService reservationService;
+
+    @Autowired
+    private GoodsService goodsService;
 //    @PostMapping("/reserve")
 //
 //    @PostMapping("/cancel")
@@ -31,15 +37,27 @@ private Result reserveGoods(@RequestBody Reservation reservation) {
                 .eq("user_id", reservation.getUserId())
                 .eq("goods_id", reservation.getGoodsId()));
 
+        int num = reservation.getReserveNum();
+
+
         if (exists) {
             // 更新现有预订
-            boolean updated = reservationService.update(reservation,
-                    new QueryWrapper<Reservation>()
-                            .eq("user_id", reservation.getUserId())
-                            .eq("goods_id", reservation.getGoodsId()));
-            return updated ? Result.suc() : Result.fail();
+//            boolean updated = reservationService.update(reservation,
+//                    new QueryWrapper<Reservation>()
+//                            .eq("user_id", reservation.getUserId())
+//                            .eq("goods_id", reservation.getGoodsId()));
+
+            return Result.fail("已有预订，请先取消！");
         } else {
             // 创建新预订
+            Goods g = goodsService.getById(reservation.getGoodsId());
+            System.out.println(g.getStorage() + " " + num);
+            if(g.getStorage() < num){
+                return Result.fail("库存不足！");
+            }
+            g.setStorage(g.getStorage() - num);
+            goodsService.updateById(g);
+            System.out.println(g.getStorage());
             boolean saved = reservationService.save(reservation);
             return saved ? Result.suc() : Result.fail();
         }
@@ -53,8 +71,15 @@ private Result reserveGoods(@RequestBody Reservation reservation) {
         Wrapper<Reservation> wrapper = new QueryWrapper<Reservation>()
                 .eq("user_id", reservation.getUserId())
                 .eq("goods_id", reservation.getGoodsId());
-
-        return reservationService.remove(wrapper) ? Result.suc() : Result.fail();
+        if(reservationService.getOne(wrapper) == null) return Result.fail("暂无预订信息！");
+        Reservation one = reservationService.getOne(wrapper);
+        Goods g = goodsService.getById(reservation.getGoodsId());
+        int num = one.getReserveNum();
+        boolean remove = reservationService.remove(wrapper);
+        if(!remove) return Result.fail("暂无预订信息！");
+        g.setStorage(g.getStorage() + num);
+        goodsService.updateById(g);
+        return Result.suc();
     }
     @GetMapping("/check-comment-perm")
     private Result checkCommentPerm(@RequestParam Integer userId, @RequestParam Integer goodsId) {
