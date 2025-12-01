@@ -166,7 +166,7 @@ export default {
   methods: {
     loadGoodsDetail() {
       const goodsId = this.$route.query.id;
-      console.log('商品ID:', goodsId);
+      // console.log('商品ID:', goodsId);
       if (!goodsId) {
         this.$message.error('商品ID无效');
         this.$router.back();
@@ -181,7 +181,7 @@ export default {
         }
       }).then(res => res.data)
           .then(res => {
-            console.log('响应数据:', res);
+            // console.log('响应数据:', res);
             if (res.code === 200 && res.data && res.data.length > 0) {
               this.goodsInfo = res.data[0];  // 取第一个商品数据
             } else {
@@ -246,7 +246,7 @@ export default {
         return;
       }
       this.reserveDialogVisible = true;
-      console.log('当前用户:', currentUser)
+      // console.log('当前用户:', currentUser)
     },
 
     confirmReserve() {
@@ -254,13 +254,14 @@ export default {
       const userId = currentUser.id;
       const goodsId = this.$route.query.id;
 
-      // 改为表单格式传递参数
-      const formData = new URLSearchParams();
-      formData.append('userId', userId);
-      formData.append('goodsId', parseInt(goodsId));
-      formData.append('reserveNum', this.reserveNum);
+      // 改为请求体传参
+      const requestData = {
+        userId: userId,
+        goodsId: parseInt(goodsId),
+        reserveNum: this.reserveNum
+      };
 
-      this.$axios.post(`${this.$httpUrl}/reservation/reserve`, formData)
+      this.$axios.post(`${this.$httpUrl}/reservation/reserve`, requestData)
           .then(res => res.data)
           .then(res => {
             if (res.code === 200) {
@@ -279,6 +280,7 @@ export default {
             this.$message.error('网络错误，请重试');
           });
     },
+
 
 
     handleCancel() {
@@ -317,8 +319,11 @@ export default {
 
       if (!userId || !goodsId) {
         this.hasCommentPerm = false;
+
         return;
       }
+      // console.log('当前用户12121:', currentUser);
+
 
       this.$axios.get(`${this.$httpUrl}/reservation/check-comment-perm`, {
         params: {
@@ -328,11 +333,15 @@ export default {
       }).then(res => res.data)
           .then(res => {
             if (res.code === 200) {
-              this.hasCommentPerm = res.data;
+              this.hasCommentPerm = true;
+              console.log('正确:', res.data);
+            }else{
+              this.hasCommentPerm = false;
             }
           })
           .catch(error => {
             console.error('权限校验错误:', error);
+
             this.hasCommentPerm = false;
           });
     },

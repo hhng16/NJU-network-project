@@ -16,9 +16,4 @@ import com.th.marketgod.entity.Reservation;
  */
 public interface ReservationService extends IService<Reservation> {
 
-
-    IPage<Reservation> pageReserve(IPage<Reservation> page, Wrapper<Reservation> wrapper);
-    Result reserveGoods(Integer userId, Integer goodsId, Integer reserveNum);
-    Result cancelReservation(Integer userId, Integer goodsId);
-    boolean checkCommentPermission(Integer userId, Integer goodsId);
 }

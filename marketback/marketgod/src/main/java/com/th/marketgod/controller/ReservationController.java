@@ -1,6 +1,7 @@
 package com.th.marketgod.controller;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.th.marketgod.entity.Reservation;
@@ -16,41 +17,53 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
     @Resource
     private ReservationService reservationService;
-    @PostMapping("/reserve")
-    @ApiOperation("商品预订")
-    public Result reserve(
-            @RequestParam Integer userId,
-            @RequestParam Integer goodsId,
-            @RequestParam Integer reserveNum
-    ) {
-        return reservationService.reserveGoods(userId, goodsId, reserveNum);
+//    @PostMapping("/reserve")
+//
+//    @PostMapping("/cancel")
+//    @GetMapping("/check-comment-perm")
+//
+//    @GetMapping("/page")
+@PostMapping("/reserve")
+private Result reserveGoods(@RequestBody Reservation reservation) {
+    try {
+        // 检查是否已存在该用户对商品的预订
+        boolean exists = reservationService.exists(new QueryWrapper<Reservation>()
+                .eq("user_id", reservation.getUserId())
+                .eq("goods_id", reservation.getGoodsId()));
+
+        if (exists) {
+            // 更新现有预订
+            boolean updated = reservationService.update(reservation,
+                    new QueryWrapper<Reservation>()
+                            .eq("user_id", reservation.getUserId())
+                            .eq("goods_id", reservation.getGoodsId()));
+            return updated ? Result.suc() : Result.fail();
+        } else {
+            // 创建新预订
+            boolean saved = reservationService.save(reservation);
+            return saved ? Result.suc() : Result.fail();
+        }
+    } catch (Exception e) {
+        return Result.fail();
     }
+}
+
     @PostMapping("/cancel")
-    @ApiOperation("商品退订")
-    public Result cancel(
-            @RequestParam Integer userId,
-            @RequestParam Integer goodsId
-    ) {
-        return reservationService.cancelReservation(userId, goodsId);
+    private Result cancelReservation(@RequestBody Reservation reservation) {
+        Wrapper<Reservation> wrapper = new QueryWrapper<Reservation>()
+                .eq("user_id", reservation.getUserId())
+                .eq("goods_id", reservation.getGoodsId());
+
+        return reservationService.remove(wrapper) ? Result.suc() : Result.fail();
     }
     @GetMapping("/check-comment-perm")
-    @ApiOperation("校验用户评论权限")
-    public Result checkCommentPermission(
-            @RequestParam Integer userId,
-            @RequestParam Integer goodsId
-    ) {
-        boolean hasPermission = reservationService.checkCommentPermission(userId, goodsId);
-        return Result.suc(hasPermission);
-    }
-    @GetMapping("/page")
-    @ApiOperation("分页查询预订记录")
-    public Result pageReserve(
-            @RequestParam Integer current,
-            @RequestParam Integer size,
-            Wrapper<Reservation> wrapper
-    ) {
-        IPage<Reservation> page = new Page<>(current, size);
-        IPage<Reservation> reservePage = reservationService.pageReserve(page, wrapper);
-        return Result.suc(reservePage.getRecords(), reservePage.getTotal());
+    private Result checkCommentPerm(@RequestParam Integer userId, @RequestParam Integer goodsId) {
+
+        Wrapper<Reservation> wrapper = new QueryWrapper<Reservation>()
+                .eq("user_id", userId)
+                .eq("goods_id", goodsId);
+        boolean exists = reservationService.exists(wrapper);
+
+        return reservationService.count(wrapper) > 0 ? Result.suc() : Result.fail();
     }
 }

@@ -67,10 +67,10 @@ public Result save(@RequestBody Comment comment) {
         //检查是否预订
         Integer userId = comment.getUserid();
         Integer goodsId = comment.getGoodsid();
-        boolean hasPermission = reservationService.checkCommentPermission(userId, goodsId);
-        if (!hasPermission) {
-            return Result.fail();
-        }
+//        boolean hasPermission = reservationService.checkCommentPermission(userId, goodsId);
+//        if (!hasPermission) {
+//            return Result.fail();
+//        }
         // 检查是否已存在该用户对商品的评论
         Comment existing = commentService.getOne(new LambdaQueryWrapper<Comment>()
                 .eq(Comment::getUserid, comment.getUserid())

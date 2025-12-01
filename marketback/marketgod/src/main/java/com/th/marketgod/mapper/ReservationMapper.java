@@ -19,6 +19,4 @@ import org.apache.ibatis.annotations.Param;
  */
 @Mapper
 public interface ReservationMapper extends BaseMapper<Reservation> {
-    IPage<Reservation> pageReserve(IPage<Reservation> page, @Param(Constants.WRAPPER) Wrapper<Reservation> wrapper);
-    Reservation selectByUserIdAndGoodsId(@Param("userId") Integer userId, @Param("goodsId") Integer goodsId);
 }
