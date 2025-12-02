@@ -182,6 +182,16 @@ export default {
   methods:{
     resetForm() {
       this.$refs.form.resetFields();
+      this.form = {
+        id: '',
+        goodsname: '',
+        price: '',
+        storage: '',
+        authorid: '',
+        image: '',
+        tag: ''
+      };
+      this.fileList = [];
       this.form.fileList = {};
     },
     //  getname(receiver){
@@ -359,8 +369,10 @@ export default {
       return (timestamp + randomNum) % 900000 + 100000;
     },
     doSave(){
+
       this.form.authorid = this.user.id;
-      this.form.id=this.generateRandomId()
+      this.form.id=this.generateRandomId();
+      console.log('Submitting form data:', this.form);
       this.$axios.post(this.$httpUrl+'/goods/save',this.form).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code===200){

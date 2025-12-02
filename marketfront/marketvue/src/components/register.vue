@@ -67,7 +67,8 @@ export default {
         password: '',
         account:0,
         number: '',
-        imgae:''
+        imgae:'',
+        roleid: 3
       },
       rules: {
         name: [

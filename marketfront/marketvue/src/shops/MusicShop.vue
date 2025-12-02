@@ -62,13 +62,8 @@
                 <div class="music-badge">
                   <span class="badge music">音乐</span>
                 </div>
-                <!-- 播放按钮 -->
-                <div class="play-button">
-                  <i class="el-icon-video-play"></i>
-                </div>
               </div>
 
-              <!-- 音乐商品信息 -->
               <div class="music-info">
                 <h3 class="music-title">{{ music.goodsname }}</h3>
 
@@ -111,13 +106,6 @@
                 </div>
 
                 <!-- 音乐波形动画 -->
-                <div class="music-wave">
-                  <div class="wave-bar"></div>
-                  <div class="wave-bar"></div>
-                  <div class="wave-bar"></div>
-                  <div class="wave-bar"></div>
-                  <div class="wave-bar"></div>
-                </div>
               </div>
             </el-card>
           </el-col>
@@ -152,7 +140,7 @@
     </div>
   </div>
 </template>
-
+<!--114514-->
 <script>
 export default {
   name: 'MusicShop',

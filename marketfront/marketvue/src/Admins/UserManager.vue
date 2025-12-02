@@ -2,7 +2,7 @@
 
   <div v-if="user && user.roleid < 2">
     <div style="margin-bottom: 5px;">
-      <el-input v-model="name" placeholder="请输入你的商品名" suffix-icon="el-icon-search" style="width: 200px;"
+      <el-input v-model="name" placeholder="请输入用户名" suffix-icon="el-icon-search" style="width: 200px;"
                 @keyup.enter.native="loadPost"></el-input>
       <el-button type="primary" style="margin-left: 5px;" @click="loadPost">查询</el-button>
       <el-button type="success" @click="resetParam">重置</el-button>
@@ -26,7 +26,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-popconfirm
-              v-if="scope.row.roleid<=1"
+              v-if="scope.row.roleid>1"
               title="确定封杀该用户吗吗？"
               @confirm="del(scope.row.id)"
               style="margin-left: 5px;"

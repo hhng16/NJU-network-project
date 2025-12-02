@@ -3,7 +3,7 @@
     <!-- 轮播图部分 -->
     <div class="carousel-section">
       <div class="section-header">
-        <h2>天工市场</h2>
+        <h2>南大小市场</h2>
         <p>发现美好生活，尽在指尖之间</p>
       </div>
 
@@ -50,7 +50,7 @@
     <div class="products-section">
       <div class="section-header">
         <h2>热门推荐</h2>
-        <p>发现精彩内容，尽在天工市场</p>
+        <p>发现精彩内容，尽在南大小市场</p>
       </div>
 
       <el-row :gutter="30" class="products-grid">
@@ -397,8 +397,8 @@ export default {
       carouselItems: [
         {
           id: 1,
-          image: require('../assets/龙千1.jpg'),
-          title: '欢迎来到天工市场',
+          image: require('../assets/njuer.png'),
+          title: '欢迎来到南大小市场',
           description: '汇聚精品好物，打造品质生活',
           link: '/DailyShop'
         },
@@ -411,7 +411,7 @@ export default {
         },
         {
           id: 3,
-          image: require('../assets/周刊1.jpg'),
+          image: require('../assets/python.jpg'),
           title: '阅读时光',
           description: '精选书刊，丰富你的精神世界',
           link: '/BookShop'
@@ -436,7 +436,7 @@ export default {
         },
         {
           id: 3,
-          image: require('../assets/周刊1.jpg'),
+          image: require('../assets/python.jpg'),
           title: '本月新刊',
           description: '最新期刊速览，掌握前沿资讯',
           link: '/BookShop',
