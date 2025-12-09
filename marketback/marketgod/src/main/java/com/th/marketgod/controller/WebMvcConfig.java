@@ -15,14 +15,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 映射本地文件路径到虚拟路径
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:///D:/upload/upimage/");
+                .addResourceLocations("file:///var/upload/upimage/");
         registry.addResourceHandler("/heads/**")
-                .addResourceLocations("file:///D:/upload/uphead/");
+                .addResourceLocations("file:///var/upload/uphead/");
 
-        logger.info("配置静态资源映射: /heads/** -> file:///D:/upload/uphead/");
+        logger.info("配置静态资源映射: /heads/** -> file:///var/upload/uphead/");
 
-        logger.info("配置静态资源映射: /images/** -> file:///D:/upload/upimage/");
+        logger.info("配置静态资源映射: /images/** -> file:///var/upload/upimage/");
     }
 }
+
 
 

@@ -15,7 +15,7 @@ public  class UploadServiceImpl  implements UploadService {
 
     @Override
     public String uploadFile (MultipartFile file) throws IOException {
-        String tackpath = "D:/upload/upimage/";
+        String tackpath = "/var/upload/upimage/";
 
         File directory = new File(tackpath);
         if (!directory.exists()) {
@@ -27,7 +27,7 @@ public  class UploadServiceImpl  implements UploadService {
     }
     @Override
     public String uploadHead (MultipartFile file) throws IOException {
-        String tackpath = "D:/upload/uphead/";
+        String tackpath = "/var/upload/uphead/";
 
         File directory = new File(tackpath);
         if (!directory.exists()) {

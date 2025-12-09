@@ -53,7 +53,7 @@ public class codeGenerator {
         // 数据源配置
         DataSourceConfig dsc = new DataSourceConfig();
         // 修改数据源
-        dsc.setUrl("jdbc:mysql://localhost:3306/tiangongmarket?useUnicode=true&characterEncoding=UTF8&useSSL=false");
+        dsc.setUrl("jdbc:mysql://localhost:3306/group14_db?useUnicode=true&characterEncoding=UTF8&useSSL=false");
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
         dsc.setUsername("root");
         dsc.setPassword("lyh16dcm");

@@ -11,7 +11,7 @@ public class DebugController {
 
     @GetMapping("/debug/images")
     public List<String> listImages() {
-        File directory = new File("D:/upload/upimage/");
+        File directory = new File("/var/upload/upimage/");
         List<String> files = new ArrayList<>();
 
         if (directory.exists() && directory.isDirectory()) {
